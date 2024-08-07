@@ -7,6 +7,7 @@ use sui::table_vec::{Self, TableVec};
 use sui::transfer;
 use sui::package;
 use sui::display;
+use sui::random::{Random, new_generator};
 
 use std::string::{String};
 
@@ -82,4 +83,16 @@ entry fun participate(
     ctx: & TxContext
 ){
     raffle_shared.participants.push_back(ctx.sender())
+}
+
+entry fun run_raffle(
+    raffle_shared: &mut RaffleShared,
+    random: &Random,
+    ctx: &mut TxContext
+) {
+    let mut random_generator = random.new_generator(ctx);
+    let winner_index = random_generator.generate_u64_in_range(
+        1, table_vec::length(&raffle_shared.participants)
+    );
+    raffle_shared.winners.push_back(raffle_shared.participants[winner_index as u64]);
 }
