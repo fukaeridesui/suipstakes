@@ -3,7 +3,7 @@ module suipstakes::raffle;
 //imports
 
 use sui::tx_context::{Self, TxContext};
-use sui::object_table::{Self, ObjectTable};
+use sui::table_vec::{Self, TableVec};
 use sui::transfer;
 use sui::package;
 use sui::display;
@@ -15,16 +15,17 @@ use std::string::{String};
 
 public struct RAFFLE has drop {}
 
-public struct Raffle has key, store {
+public struct Raffle has key {
     id: UID,
-    raffle_name: String,
-    raffle_description: String,
+    title: String,
+    description: String,
 }
 
 public struct RaffleShared has key {
     id: UID,
     raffle_id: ID,
-    participants: vector<address>,
+    participants: TableVec<address>,
+    winners: TableVec<address>,
 }
 
 // init function
@@ -35,7 +36,7 @@ fun init(otw: RAFFLE, ctx: &mut TxContext){
         b"description".to_string(),
     ];
     let values = vector[
-        b"{raffle_name}".to_string(),
+        b"{title}".to_string(),
         b"lets raffle on Sui".to_string(),
     ];
 
@@ -54,31 +55,31 @@ fun init(otw: RAFFLE, ctx: &mut TxContext){
 // functions
 
 entry fun create(
-    raffle_name: String,
-    raffle_description: String,
+    title: String,
+    description: String,
     ctx: &mut TxContext
 ){
     let giveaway_raffle = Raffle{
         id: object::new(ctx),
-        raffle_name,
-        raffle_description,
+        title,
+        description,
     };
 
     transfer::share_object(
         RaffleShared {
             id: object::new(ctx),
             raffle_id: object::id(&giveaway_raffle),
-            participants: vector[],
+            participants: table_vec::empty(ctx),
+            winners: table_vec::empty(ctx),
         }
     );
 
-    transfer::public_transfer(giveaway_raffle, ctx.sender());
+    transfer::transfer(giveaway_raffle, ctx.sender());
 }
 
 entry fun participate(
     raffle_shared: &mut RaffleShared,
-    ctx: &mut TxContext
+    ctx: & TxContext
 ){
     raffle_shared.participants.push_back(ctx.sender())
 }
-
