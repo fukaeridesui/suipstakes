@@ -1,6 +1,6 @@
 module suipstakes::raffle;
 
-//imports
+// === Imports ===
 
 use sui::tx_context::{Self, TxContext};
 use sui::table_vec::{Self, TableVec};
@@ -12,7 +12,7 @@ use sui::random::{Random, new_generator};
 use std::string::{String};
 
 
-// structs
+// === Structs ===
 
 public struct RAFFLE has drop {}
 
@@ -29,7 +29,7 @@ public struct RaffleShared has key {
     winners: TableVec<address>,
 }
 
-// init function
+// === Functions ===
 
 fun init(otw: RAFFLE, ctx: &mut TxContext){
     let keys = vector[
@@ -52,8 +52,6 @@ fun init(otw: RAFFLE, ctx: &mut TxContext){
     transfer::public_transfer(display_obj, ctx.sender());
     transfer::public_transfer(publisher, ctx.sender());
 }
-
-// functions
 
 entry fun create(
     title: String,
@@ -85,7 +83,7 @@ entry fun participate(
     raffle_shared.participants.push_back(ctx.sender())
 }
 
-entry fun run_raffle(
+entry fun run(
     raffle_shared: &mut RaffleShared,
     random: &Random,
     ctx: &mut TxContext
