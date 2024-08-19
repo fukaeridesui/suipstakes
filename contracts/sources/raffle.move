@@ -20,77 +20,54 @@ public struct Raffle has key {
     id: UID,
     title: String,
     description: String,
-}
-
-public struct RaffleShared has key {
-    id: UID,
-    raffle_id: ID,
+    prise_in_sui: u64,
+    min_participants: u32,
+    max_participants: u32,
+    start_timestamp: u64,
+    end_timestamp: u64,
     participants: TableVec<address>,
     winners: TableVec<address>,
 }
 
 // === Functions ===
 
-fun init(otw: RAFFLE, ctx: &mut TxContext){
-    let keys = vector[
-        b"name".to_string(),
-        b"description".to_string(),
-    ];
-    let values = vector[
-        b"{title}".to_string(),
-        b"lets raffle on Sui".to_string(),
-    ];
-
-    let publisher = package::claim(otw, ctx);
-
-    let mut display_obj = display::new_with_fields<Raffle>(
-        &publisher, keys, values, ctx
-    );
-
-    display::update_version(&mut display_obj);
-
-    transfer::public_transfer(display_obj, ctx.sender());
-    transfer::public_transfer(publisher, ctx.sender());
-}
-
 entry fun create(
     title: String,
     description: String,
     ctx: &mut TxContext
 ){
-    let giveaway_raffle = Raffle{
+    let raffle = Raffle{
         id: object::new(ctx),
         title,
         description,
+        participants: table_vec::empty(ctx),
+        winners: table_vec::empty(ctx),
+        //values are for test and need to be fixed
+        prise_in_sui: 100000000,
+        min_participants: 1,
+        max_participants: 100,
+        start_timestamp: 12345,
+        end_timestamp: 12345,
     };
 
-    transfer::share_object(
-        RaffleShared {
-            id: object::new(ctx),
-            raffle_id: object::id(&giveaway_raffle),
-            participants: table_vec::empty(ctx),
-            winners: table_vec::empty(ctx),
-        }
-    );
-
-    transfer::transfer(giveaway_raffle, ctx.sender());
+    transfer::share_object(raffle);
 }
 
 entry fun participate(
-    raffle_shared: &mut RaffleShared,
+    raffle: &mut Raffle,
     ctx: & TxContext
 ){
-    raffle_shared.participants.push_back(ctx.sender())
+    raffle.participants.push_back(ctx.sender())
 }
 
 entry fun run(
-    raffle_shared: &mut RaffleShared,
+    raffle: &mut Raffle,
     random: &Random,
     ctx: &mut TxContext
 ) {
     let mut random_generator = random.new_generator(ctx);
     let winner_index = random_generator.generate_u64_in_range(
-        1, table_vec::length(&raffle_shared.participants)
+        0, table_vec::length(&raffle.participants) - 1
     );
-    raffle_shared.winners.push_back(raffle_shared.participants[winner_index as u64]);
+    raffle.winners.push_back(raffle.participants[winner_index as u64]);
 }
