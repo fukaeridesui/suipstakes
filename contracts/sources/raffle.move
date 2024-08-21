@@ -20,7 +20,7 @@ public struct Raffle has key {
     id: UID,
     title: String,
     description: String,
-    prise_in_sui: u64,
+    prize_in_sui: u64,
     min_participants: u32,
     max_participants: u32,
     start_timestamp: u64,
