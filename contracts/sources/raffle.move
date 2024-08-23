@@ -43,7 +43,7 @@ entry fun create(
         participants: table_vec::empty(ctx),
         winners: table_vec::empty(ctx),
         //values are for test and need to be fixed
-        prise_in_sui: 100000000,
+        prize_in_sui: 100000000,
         min_participants: 1,
         max_participants: 100,
         start_timestamp: 12345,
