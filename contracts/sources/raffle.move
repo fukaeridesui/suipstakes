@@ -3,11 +3,11 @@ module suipstakes::raffle;
 // === Imports ===
 
 use sui::tx_context::{Self, TxContext};
-use sui::table_vec::{Self, TableVec};
 use sui::transfer;
 use sui::package;
 use sui::display;
 use sui::random::{Random, new_generator};
+use sui::vec_set::{Self, VecSet};
 
 use std::string::{String};
 
@@ -25,8 +25,8 @@ public struct Raffle has key {
     max_participants: u32,
     start_timestamp: u64,
     end_timestamp: u64,
-    participants: TableVec<address>,
-    winners: TableVec<address>,
+    participants: VecSet<address>,
+    winners: VecSet<address>,
 }
 
 // === Functions ===
@@ -40,8 +40,8 @@ entry fun create(
         id: object::new(ctx),
         title,
         description,
-        participants: table_vec::empty(ctx),
-        winners: table_vec::empty(ctx),
+        participants: vec_set::empty<address>(),
+        winners: vec_set::empty<address>(),
         //values are for test and need to be fixed
         prize_in_sui: 100000000,
         min_participants: 1,
@@ -57,7 +57,7 @@ entry fun participate(
     raffle: &mut Raffle,
     ctx: & TxContext
 ){
-    raffle.participants.push_back(ctx.sender())
+    raffle.participants.insert(ctx.sender())
 }
 
 entry fun run(
@@ -67,7 +67,12 @@ entry fun run(
 ) {
     let mut random_generator = random.new_generator(ctx);
     let winner_index = random_generator.generate_u64_in_range(
-        0, table_vec::length(&raffle.participants) - 1
+        0, vec_set::size(&raffle.participants) - 1
     );
-    raffle.winners.push_back(raffle.participants[winner_index as u64]);
+    // raffle.winners.insert(raffle.participants[winner_index]);
+    let addr = raffle.participants.keys();
+    raffle.winners.insert(addr[winner_index]);
+    // let vec = raffle.participants.into_keys();
+    // let winner_address = vec[winner_index];
+    // raffle.winners.insert(winner_address);
 }
