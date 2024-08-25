@@ -11,6 +11,9 @@ use sui::vec_set::{Self, VecSet};
 
 use std::string::{String};
 
+// === Errors ===
+
+const EDuplicateAddress: u64 = 1;
 
 // === Structs ===
 
@@ -57,6 +60,7 @@ entry fun participate(
     raffle: &mut Raffle,
     ctx: & TxContext
 ){
+    assert!(raffle.participants.contains(&ctx.sender()) == false, EDuplicateAddress);
     raffle.participants.insert(ctx.sender())
 }
 
@@ -69,10 +73,6 @@ entry fun run(
     let winner_index = random_generator.generate_u64_in_range(
         0, vec_set::size(&raffle.participants) - 1
     );
-    // raffle.winners.insert(raffle.participants[winner_index]);
     let addr = raffle.participants.keys();
     raffle.winners.insert(addr[winner_index]);
-    // let vec = raffle.participants.into_keys();
-    // let winner_address = vec[winner_index];
-    // raffle.winners.insert(winner_address);
 }
