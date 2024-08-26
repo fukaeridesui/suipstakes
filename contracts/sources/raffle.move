@@ -30,6 +30,7 @@ public struct Raffle has key {
     end_timestamp: u64,
     participants: VecSet<address>,
     winners: VecSet<address>,
+    number_of_winners: u8,
 }
 
 // === Functions ===
@@ -51,6 +52,7 @@ entry fun create(
         max_participants: 100,
         start_timestamp: 12345,
         end_timestamp: 12345,
+        number_of_winners: 3
     };
 
     transfer::share_object(raffle);
