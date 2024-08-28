@@ -2,12 +2,10 @@ module suipstakes::raffle;
 
 // === Imports ===
 
-use sui::tx_context::{Self, TxContext};
-use sui::transfer;
-use sui::package;
-use sui::display;
-use sui::random::{Random, new_generator};
-use sui::vec_set::{Self, VecSet};
+use sui::{
+    random::{Random, new_generator},
+    vec_set::{Self, VecSet},
+};
 
 use std::string::{String};
 
