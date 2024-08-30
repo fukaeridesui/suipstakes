@@ -30,7 +30,7 @@ public struct Raffle has key {
     end_timestamp: u64,
     participants: VecSet<address>,
     winners: VecSet<address>,
-    number_of_winners: u8,
+    number_of_winners: u16,
 }
 
 // === Functions ===
@@ -74,7 +74,10 @@ entry fun run(
     let mut random_generator = random.new_generator(ctx);
     let mut i = 0;
     while (i < raffle.number_of_winners) {
-        let winner_index = random_generator.generate_u64_in_range(0, vec_set::size(&raffle.participants) -1);
+        let winner_index = random_generator.generate_u64_in_range(
+            0, 
+            raffle.participants.size() -1
+        );
         let address_list = raffle.participants.keys();
         let winner_address = address_list[winner_index];
         raffle.winners.insert(winner_address);
