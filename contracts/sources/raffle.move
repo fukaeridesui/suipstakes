@@ -30,6 +30,7 @@ public struct Raffle has key {
     end_timestamp: u64,
     participants: VecSet<address>,
     winners: VecSet<address>,
+    number_of_winners: u16,
 }
 
 // === Functions ===
@@ -51,6 +52,7 @@ entry fun create(
         max_participants: 100,
         start_timestamp: 12345,
         end_timestamp: 12345,
+        number_of_winners: 2
     };
 
     transfer::share_object(raffle);
@@ -70,9 +72,17 @@ entry fun run(
     ctx: &mut TxContext
 ) {
     let mut random_generator = random.new_generator(ctx);
-    let winner_index = random_generator.generate_u64_in_range(
-        0, vec_set::size(&raffle.participants) - 1
-    );
-    let addr = raffle.participants.keys();
-    raffle.winners.insert(addr[winner_index]);
+    let mut i = 0;
+    while (i < raffle.number_of_winners) {
+        let winner_index = random_generator.generate_u64_in_range(
+            0, 
+            raffle.participants.size() -1
+        );
+        let address_list = raffle.participants.keys();
+        let winner_address = address_list[winner_index];
+        raffle.winners.insert(winner_address);
+        raffle.participants.remove(&winner_address);
+
+        i = i + 1;
+    }
 }
