@@ -43,6 +43,7 @@ entry fun create(
     description: String,
     min_participants: u32,
     max_participants: u32,
+    number_of_winners: u16,
     ctx: &mut TxContext
 ){
     assert!(min_participants > 0, EInvalidMinParticipants);
@@ -57,13 +58,13 @@ entry fun create(
         description,
         participants: vec_set::empty(),
         winners: vec_set::empty(),
-        //values are for test and need to be fixed
-        prize_in_sui: 100000000,
         min_participants,
         max_participants,
+        number_of_winners,
+        // [TODO] values are for test and need to be fixed
+        prize_in_sui: 100000000,
         start_timestamp: 12345,
         end_timestamp: 12345,
-        number_of_winners: 2
     };
 
     transfer::share_object(raffle);
