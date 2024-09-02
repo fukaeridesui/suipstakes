@@ -17,6 +17,7 @@ const EInvalidMaxParticipants: u64 = 3;
 const EInvalidParticipantsRange: u64 = 4;
 const EParticipantsMaxReached: u64 = 5;
 const ENotEnoughParticipants: u64 = 6;
+const EInvalidNumberOfWinners: u64 = 7;
 
 // === Structs ===
 
@@ -33,7 +34,7 @@ public struct Raffle has key {
     end_timestamp: u64,
     participants: VecSet<address>,
     winners: VecSet<address>,
-    number_of_winners: u16,
+    number_of_winners: u32,
 }
 
 // === Functions ===
@@ -43,12 +44,13 @@ entry fun create(
     description: String,
     min_participants: u32,
     max_participants: u32,
-    number_of_winners: u16,
+    number_of_winners: u32,
     ctx: &mut TxContext
 ){
     assert!(min_participants > 0, EInvalidMinParticipants);
     assert!(max_participants > 0, EInvalidMaxParticipants);
     assert!(min_participants <= max_participants, EInvalidParticipantsRange);
+    assert!(number_of_winners >= min_participants && number_of_winners <= max_participants, EInvalidNumberOfWinners);
 
     // TODO: number_of_winners の引数を追加後、 min_participants, max_participants と同様にバリデーションを追加する
 
