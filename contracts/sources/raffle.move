@@ -52,8 +52,6 @@ entry fun create(
     assert!(min_participants <= max_participants, EInvalidParticipantsRange);
     assert!(number_of_winners >= min_participants && number_of_winners <= max_participants, EInvalidNumberOfWinners);
 
-    // TODO: number_of_winners の引数を追加後、 min_participants, max_participants と同様にバリデーションを追加する
-
     let raffle = Raffle {
         id: object::new(ctx),
         title,
