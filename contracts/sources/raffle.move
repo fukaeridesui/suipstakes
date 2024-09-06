@@ -121,7 +121,7 @@ entry fun run(
 // === Raffle fields access ===
 
 /// Check whether the `RaffleOwnerCap` matches the `Raffle`.
-public fun has_access(self: &mut Raffle, cap: &RaffleOwnerCap): bool {
+public fun has_access(self: &Raffle, cap: &RaffleOwnerCap): bool {
     object::id(self) == cap.`for`
 }
 
