@@ -5,6 +5,7 @@ module suipstakes::raffle;
 use sui::{
     random::{Random, new_generator},
     vec_set::{Self, VecSet},
+    clock::Clock,
 };
 
 use std::string::{String};
@@ -18,6 +19,9 @@ const EInvalidParticipantsRange: u64 = 4;
 const EParticipantsMaxReached: u64 = 5;
 const ENotEnoughParticipants: u64 = 6;
 const EInvalidNumberOfWinners: u64 = 7;
+const ERaffleNotStarted: u64 = 8;
+const ERaffleEnded: u64 = 9;
+const ERaffleNotEnded: u64 = 10;
 
 // === Structs ===
 
@@ -44,6 +48,8 @@ entry fun create(
     description: String,
     min_participants: u32,
     max_participants: u32,
+    start_timestamp: u64,
+    end_timestamp: u64,
     number_of_winners: u32,
     ctx: &mut TxContext
 ){
@@ -60,11 +66,11 @@ entry fun create(
         winners: vec_set::empty(),
         min_participants,
         max_participants,
+        start_timestamp,
+        end_timestamp,
         number_of_winners,
         // [TODO] values are for test and need to be fixed
         prize_in_sui: 100000000,
-        start_timestamp: 12345,
-        end_timestamp: 12345,
     };
 
     transfer::share_object(raffle);
@@ -73,10 +79,13 @@ entry fun create(
 
 entry fun participate(
     raffle: &mut Raffle,
+    clock: &Clock,
     ctx: & TxContext
 ){
     assert!(raffle.participants.size() as u32 < raffle.max_participants, EParticipantsMaxReached);
     assert!(raffle.participants.contains(&ctx.sender()) == false, EDuplicateAddress);
+    assert!(raffle.start_timestamp < clock.timestamp_ms(), ERaffleNotStarted);
+    assert!(raffle.end_timestamp > clock.timestamp_ms(), ERaffleEnded);
 
     raffle.participants.insert(ctx.sender())
 }
@@ -84,9 +93,11 @@ entry fun participate(
 entry fun run(
     raffle: &mut Raffle,
     random: &Random,
+    clock: &Clock,
     ctx: &mut TxContext
 ) {
     assert!(raffle.participants.size() as u32 >= raffle.min_participants, ENotEnoughParticipants);
+    assert!(raffle.end_timestamp < clock.timestamp_ms(), ERaffleNotEnded);
 
     let mut random_generator = random.new_generator(ctx);
     let mut i = 0;
