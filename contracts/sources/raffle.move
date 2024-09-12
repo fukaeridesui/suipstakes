@@ -22,6 +22,7 @@ const EInvalidNumberOfWinners: u64 = 7;
 const ERaffleNotStarted: u64 = 8;
 const ERaffleEnded: u64 = 9;
 const ERaffleNotEnded: u64 = 10;
+const EInvalidTimestamp: u64 = 11;
 
 // === Structs ===
 
@@ -57,6 +58,7 @@ entry fun create(
     assert!(max_participants > 0, EInvalidMaxParticipants);
     assert!(min_participants <= max_participants, EInvalidParticipantsRange);
     assert!(number_of_winners >= min_participants && number_of_winners <= max_participants, EInvalidNumberOfWinners);
+    assert!(start_timestamp <= end_timestamp, EInvalidTimestamp);
 
     let raffle = Raffle {
         id: object::new(ctx),
@@ -84,8 +86,8 @@ entry fun participate(
 ){
     assert!(raffle.participants.size() as u32 < raffle.max_participants, EParticipantsMaxReached);
     assert!(raffle.participants.contains(&ctx.sender()) == false, EDuplicateAddress);
-    assert!(raffle.start_timestamp < clock.timestamp_ms(), ERaffleNotStarted);
-    assert!(raffle.end_timestamp > clock.timestamp_ms(), ERaffleEnded);
+    assert!(raffle.start_timestamp <= clock.timestamp_ms(), ERaffleNotStarted);
+    assert!(raffle.end_timestamp >= clock.timestamp_ms(), ERaffleEnded);
 
     raffle.participants.insert(ctx.sender())
 }
@@ -97,7 +99,7 @@ entry fun run(
     ctx: &mut TxContext
 ) {
     assert!(raffle.participants.size() as u32 >= raffle.min_participants, ENotEnoughParticipants);
-    assert!(raffle.end_timestamp < clock.timestamp_ms(), ERaffleNotEnded);
+    assert!(raffle.end_timestamp <= clock.timestamp_ms(), ERaffleNotEnded);
 
     let mut random_generator = random.new_generator(ctx);
     let mut i = 0;
