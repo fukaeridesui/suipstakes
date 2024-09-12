@@ -23,6 +23,7 @@ const ERaffleNotStarted: u64 = 8;
 const ERaffleEnded: u64 = 9;
 const ERaffleNotEnded: u64 = 10;
 const EInvalidTimestamp: u64 = 11;
+const ENotOwner: u64 = 8;
 
 // === Structs ===
 
@@ -40,6 +41,11 @@ public struct Raffle has key {
     participants: VecSet<address>,
     winners: VecSet<address>,
     number_of_winners: u32,
+}
+
+public struct RaffleOwnerCap has key, store {
+    id: UID,
+    `for`: ID
 }
 
 // === Functions ===
@@ -75,7 +81,13 @@ entry fun create(
         prize_in_sui: 100000000,
     };
 
+    let raffle_owner_cap = RaffleOwnerCap {
+        id: object::new(ctx),
+        `for`: object::id(&raffle)
+    };
+
     transfer::share_object(raffle);
+    transfer::public_transfer(raffle_owner_cap, ctx.sender());
 }
 
 
@@ -94,10 +106,12 @@ entry fun participate(
 
 entry fun run(
     raffle: &mut Raffle,
+    cap: &RaffleOwnerCap,
     random: &Random,
     clock: &Clock,
     ctx: &mut TxContext
 ) {
+    assert!(has_access(raffle, cap), ENotOwner);
     assert!(raffle.participants.size() as u32 >= raffle.min_participants, ENotEnoughParticipants);
     assert!(raffle.end_timestamp <= clock.timestamp_ms(), ERaffleNotEnded);
 
@@ -115,4 +129,18 @@ entry fun run(
 
         i = i + 1;
     }
+}
+
+// === Raffle fields access ===
+
+/// Check whether the `RaffleOwnerCap` matches the `Raffle`.
+public fun has_access(self: &Raffle, cap: &RaffleOwnerCap): bool {
+    object::id(self) == cap.`for`
+}
+
+// === RaffleOwnerCap fields access ===
+
+/// Get the `for` field of the `RaffleOwnerCap`.
+public fun raffle_owner_cap_for(cap: &RaffleOwnerCap): ID {
+    cap.`for`
 }
