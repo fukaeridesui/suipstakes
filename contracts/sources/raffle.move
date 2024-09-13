@@ -113,7 +113,7 @@ entry fun run(
 ) {
     assert!(has_access(raffle, cap), ENotOwner);
     assert!(raffle.participants.size() as u32 >= raffle.min_participants, ENotEnoughParticipants);
-    assert!(raffle.end_timestamp <= clock.timestamp_ms(), ERaffleNotEnded);
+    assert!(raffle.end_timestamp < clock.timestamp_ms(), ERaffleNotEnded);
 
     let mut random_generator = random.new_generator(ctx);
     let mut i = 0;
