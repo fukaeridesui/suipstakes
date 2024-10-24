@@ -1,4 +1,4 @@
-import { Header, BottomNavigation } from './layouts';
+import { Header, Footer, BottomNavigation } from './layouts';
 import { RaffleState } from './components';
 
 export default function App() {
@@ -9,6 +9,7 @@ export default function App() {
         <RaffleState />
       </div>
       <div className="min-h-screen"></div>
+      <Footer />
       <BottomNavigation />
     </div>
   );
