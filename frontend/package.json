@@ -13,7 +13,9 @@
     "deploy": "tsx scripts/deploy.ts"
   },
   "dependencies": {
-    "@mysten/sui": "^1.6.0",
+    "@mysten/dapp-kit": "^0.14.30",
+    "@mysten/sui": "^1.14.2",
+    "@tanstack/react-query": "^5.59.20",
     "dotenv": "^16.4.5",
     "path": "^0.12.7",
     "react": "^18.3.1",

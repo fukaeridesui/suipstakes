@@ -1,4 +1,5 @@
 import { Search, User } from 'lucide-react';
+import { ConnectButton } from '@mysten/dapp-kit';
 
 export const Header = () => {
   return (
@@ -35,6 +36,11 @@ export const Header = () => {
           <User className="size-[22px] stroke-2" />
           0x123...456
         </button>
+        <div className="App">
+          <header className="App-header">
+            <ConnectButton />
+          </header>
+        </div>
         <button
           type="button"
           className="hidden rounded bg-blue-500 px-4 py-2 text-sm font-bold text-white hover:bg-blue-400 md:block"
